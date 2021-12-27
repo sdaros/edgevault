@@ -1,0 +1,2 @@
+vaultwarden/** filter=git-crypt diff=git-crypt
+**/*.env filter=git-crypt diff=git-crypt
