@@ -39,7 +39,7 @@ in {
   };
   modules.acme = { #                             Fetches a TLS certificate for your host
     enable = true;
-    email = "john.doe@cip.li"; #                   Let's Encrypt likes to have your email address
+    email = "john.doe@cip.li"; #                 Let's Encrypt likes to have your email address
     dnsProvider = "cloudflare"; #                Use DNS to provide proof of domain ownership
     credentialsFile = ./credentials.env; #       Your DNS Provider's credentials, in .gitignore!
   };
