@@ -1,6 +1,6 @@
 # Edgevault
 
-> Collocate your Pi in a wind turbine for fun and profit!
+> Host your Vaultwarden Server in a wind turbine for fun and profit!
 
 If you're the kind of person who, 
 
