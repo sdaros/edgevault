@@ -1,0 +1,28 @@
+{
+  "sources": {
+    "azure": {
+      "enabled": true,
+      "name": "Azure Well-Architected Framework",
+      "base_url": "https://learn.microsoft.com/en-us/azure/well-architected/",
+      "output_dir": "enterprise_docs/azure_well_architected",
+      "organize_by_category": true,
+      "max_depth": 3,
+      "use_discovery": true,
+      "use_javascript": false
+    },
+    "sap_btp": {
+      "enabled": true,
+      "name": "SAP BTP Guidance Framework",
+      "base_url": "https://discovery-center.cloud.sap/guidance-framework",
+      "output_dir": "enterprise_docs/sap_btp_guidance",
+      "organize_by_category": true,
+      "max_depth": 2,
+      "use_discovery": true,
+      "use_javascript": true
+    }
+  },
+  "global": {
+    "parallel_execution": false,
+    "respect_robots_txt": true
+  }
+}

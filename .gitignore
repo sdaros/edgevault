@@ -3,3 +3,4 @@ vaultwarden/*
 !vaultwarden/.gitkeep
 azure_reliability_docs/
 azure_well_architected_docs/
+enterprise_docs/
