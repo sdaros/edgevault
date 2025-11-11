@@ -1,9 +1,18 @@
-# Azure Well-Architected Reliability Documentation Scraper
+# Azure Well-Architected Framework Documentation Scraper
 
-A Python script that scrapes the Azure Well-Architected Reliability documentation and saves it as markdown files for use with Claude agents or other AI assistants.
+A Python script that scrapes the entire Azure Well-Architected Framework documentation and saves it as markdown files for use with Claude agents or other AI assistants.
 
 ## Features
 
+- **Comprehensive Coverage**: Scrapes the entire Well-Architected Framework including all pillars:
+  - Reliability
+  - Security
+  - Cost Optimization
+  - Operational Excellence
+  - Performance Efficiency
+  - Plus specialized guides (AI, Mission-Critical, Azure VMware, Oracle IaaS, SAP, etc.)
+- **Organized by Pillar**: Automatically organizes files into subdirectories by pillar for easy navigation
+- **Recursive Link Discovery**: Automatically discovers all related articles through recursive crawling
 - **ETag-based Change Detection**: Uses HTTP HEAD requests and ETags to detect content changes
 - **Incremental Updates**: Only downloads and updates articles that have changed
 - **Markdown Conversion**: Converts HTML to clean markdown format
@@ -22,18 +31,18 @@ pip install -r requirements_scraper.txt
 
 ### Basic Usage
 
-Run the script to scrape all Azure reliability documentation:
+Run the script to scrape the entire Azure Well-Architected Framework:
 
 ```bash
-python scrape_azure_reliability.py
+python scrape_azure_well_architected.py
 ```
 
 ### Output
 
 The script will:
-1. Create an `azure_reliability_docs/` directory
-2. Save each article as a separate markdown file
-3. Store ETags in `azure_reliability_docs/.etag_cache.json`
+1. Create an `azure_well_architected_docs/` directory
+2. Save each article as a separate markdown file (organized by pillar)
+3. Store ETags in `azure_well_architected_docs/.etag_cache.json`
 4. Display progress and summary statistics
 
 ### Running Updates
@@ -41,7 +50,7 @@ The script will:
 To check for updates and refresh changed content, simply run the script again:
 
 ```bash
-python scrape_azure_reliability.py
+python scrape_azure_well_architected.py
 ```
 
 The script will:
@@ -52,14 +61,37 @@ The script will:
 
 ## Output Structure
 
+The scraper organizes documentation by pillar in subdirectories:
+
 ```
-azure_reliability_docs/
-├── .etag_cache.json          # ETag cache for change detection
-├── index.md                   # Main reliability page
-├── checklist.md               # Reliability checklist
-├── metrics.md                 # Reliability metrics
-└── ... (other articles)
+azure_well_architected_docs/
+├── .etag_cache.json                    # ETag cache for change detection
+├── index.md                             # Main Well-Architected page
+├── reliability/                         # Reliability pillar
+│   ├── reliability.md
+│   ├── reliability_checklist.md
+│   ├── reliability_metrics.md
+│   └── ... (other reliability articles)
+├── security/                            # Security pillar
+│   ├── security.md
+│   ├── security_checklist.md
+│   └── ... (other security articles)
+├── cost-optimization/                   # Cost Optimization pillar
+│   ├── cost-optimization.md
+│   ├── cost-optimization_checklist.md
+│   └── ... (other cost articles)
+├── operational-excellence/              # Operational Excellence pillar
+│   └── ... (operational excellence articles)
+├── performance-efficiency/              # Performance Efficiency pillar
+│   └── ... (performance articles)
+├── ai/                                  # AI workload guidance
+│   └── ... (AI-specific articles)
+├── mission-critical/                    # Mission-critical guidance
+│   └── ... (mission-critical articles)
+└── ... (other specialized guides)
 ```
+
+**Total**: ~341 articles (~5.6MB of markdown documentation)
 
 ## Configuration
 
@@ -67,35 +99,80 @@ You can modify the script configuration by editing the `main()` function:
 
 ```python
 def main():
-    BASE_URL = "https://learn.microsoft.com/en-us/azure/well-architected/reliability/"
-    OUTPUT_DIR = "azure_reliability_docs"
+    # Configuration
+    BASE_URL = "https://learn.microsoft.com/en-us/azure/well-architected/"
+    OUTPUT_DIR = "azure_well_architected_docs"
 
-    scraper = AzureReliabilityScraper(BASE_URL, OUTPUT_DIR)
-    scraper.scrape()
+    # Options
+    ORGANIZE_BY_PILLAR = True  # Set to False for flat structure
+    MAX_DEPTH = 3              # How deep to crawl links (1-5 recommended)
+    USE_DISCOVERY = True       # Set to False to only scrape main page links
+
+    scraper = AzureWellArchitectedScraper(
+        BASE_URL,
+        OUTPUT_DIR,
+        organize_by_pillar=ORGANIZE_BY_PILLAR
+    )
+    scraper.scrape(max_depth=MAX_DEPTH, use_discovery=USE_DISCOVERY)
 ```
+
+### Configuration Options
+
+- **BASE_URL**: The starting URL to scrape. Use specific pillar URLs to scrape only that pillar:
+  - Full framework: `https://learn.microsoft.com/en-us/azure/well-architected/`
+  - Reliability only: `https://learn.microsoft.com/en-us/azure/well-architected/reliability/`
+  - Security only: `https://learn.microsoft.com/en-us/azure/well-architected/security/`
+
+- **OUTPUT_DIR**: Directory where markdown files will be saved
+
+- **ORGANIZE_BY_PILLAR**:
+  - `True` (default): Files organized in subdirectories by pillar
+  - `False`: All files in a flat structure
+
+- **MAX_DEPTH**: Controls how many levels deep to crawl for links
+  - `1`: Only links from the main page
+  - `2`: Links from main page + links from those pages
+  - `3` (default): Three levels deep (recommended for full coverage)
+  - Higher values may discover more articles but take longer
+
+- **USE_DISCOVERY**:
+  - `True` (default): Recursively discover all linked articles
+  - `False`: Only scrape articles linked directly from the main page
 
 ## How It Works
 
-1. **Link Discovery**: Scrapes the main reliability page to find all article links
+1. **Recursive Link Discovery**: Starting from the base URL, recursively discovers all linked articles within the Well-Architected Framework up to the specified depth
 2. **Change Detection**: For each URL, sends HTTP HEAD request to get ETag
-3. **Conditional Download**: Only downloads articles with changed ETags
-4. **Content Extraction**: Extracts main content from HTML, removing navigation and sidebars
-5. **Markdown Conversion**: Converts HTML to markdown using markdownify
-6. **File Management**: Saves articles with sanitized filenames based on URLs
-7. **Cache Update**: Updates ETag cache after successful downloads
+3. **ETag Comparison**: Compares new ETags against cached values to detect changes
+4. **Conditional Download**: Only downloads articles with changed or missing ETags
+5. **Content Extraction**: Extracts main content from HTML, removing navigation, sidebars, and footers
+6. **Markdown Conversion**: Converts HTML to clean markdown using markdownify
+7. **File Organization**: Saves articles with sanitized filenames, optionally organized by pillar
+8. **Cache Update**: Updates ETag cache after successful downloads for efficient future runs
 
 ## Loading Content into Claude
 
 To use the scraped documentation with Claude:
 
-1. **Project Knowledge**: Add the `azure_reliability_docs/` directory to your Claude project's knowledge base
+1. **Project Knowledge**: Add the `azure_well_architected_docs/` directory (or specific pillar subdirectories) to your Claude project's knowledge base
 
 2. **Direct Upload**: Upload specific markdown files to a conversation
 
-3. **Batch Processing**: Combine multiple files for comprehensive context:
+3. **Batch Processing by Pillar**: Combine files from a specific pillar:
    ```bash
-   cat azure_reliability_docs/*.md > combined_reliability_docs.md
+   # Combine all reliability articles
+   cat azure_well_architected_docs/reliability/*.md > reliability_combined.md
+
+   # Combine all security articles
+   cat azure_well_architected_docs/security/*.md > security_combined.md
    ```
+
+4. **Full Framework**: Combine all articles (note: this creates a very large file):
+   ```bash
+   find azure_well_architected_docs -name "*.md" -exec cat {} \; > full_framework.md
+   ```
+
+5. **Selective Loading**: Load only specific pillars relevant to your use case to manage context size
 
 ## Troubleshooting
 
