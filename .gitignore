@@ -4,3 +4,4 @@ vaultwarden/*
 azure_reliability_docs/
 azure_well_architected_docs/
 enterprise_docs/
+scraper_output.log
