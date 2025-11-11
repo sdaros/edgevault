@@ -1,3 +1,4 @@
 **/*.env
 vaultwarden/*
 !vaultwarden/.gitkeep
+azure_reliability_docs/
